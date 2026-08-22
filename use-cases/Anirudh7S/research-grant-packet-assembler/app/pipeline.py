@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 from app.assemble import build_grant_package
+from app.biosketch import convert_investigator_to_biosketch
 from app.classify import classify_document
 from app.extract import (
     extract_budget_justification,
@@ -71,6 +72,43 @@ def build_extracted_documents(
     return extracted_documents
 
 
+def build_biosketches(
+    extracted_documents: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    """
+    Convert every investigator CV into a funder-style biosketch.
+
+    The original extracted CV facts remain untouched. Each biosketch
+    carries an explicit content-preservation result.
+    """
+
+    biosketches = []
+
+    for document in extracted_documents:
+        if document["document_type"] != "investigator_cv":
+            continue
+
+        facts = document.get("facts", {})
+
+        biosketch = convert_investigator_to_biosketch(
+            facts
+        )
+
+        biosketches.append(
+            {
+                "source_document": document["filename"],
+                "investigator": biosketch["name"],
+                "format": biosketch["format"],
+                "rendered_text": biosketch["rendered_text"],
+                "content_preservation": biosketch[
+                    "content_preservation"
+                ],
+            }
+        )
+
+    return biosketches
+
+
 def run_validation(
     grant_directory: str | Path,
 ) -> Dict[str, Any]:
@@ -94,10 +132,14 @@ def run_grant_assembly(
     grant_directory: str | Path,
     output_path: str | Path = "output/grant_package.json",
 ) -> Dict[str, Any]:
-    """Run extraction, validation, assembly, and persistence."""
+    """Run extraction, biosketch conversion, validation, assembly, and persistence."""
 
     extracted_documents = build_extracted_documents(
         grant_directory
+    )
+
+    biosketches = build_biosketches(
+        extracted_documents
     )
 
     validation = validate_documents(
@@ -108,6 +150,9 @@ def run_grant_assembly(
         extracted_documents
     )
 
+    # Keep generated biosketches alongside the assembled grant package.
+    grant_package["biosketches"] = biosketches
+
     saved_path = save_grant_package(
         grant_package,
         output_path,
@@ -115,6 +160,7 @@ def run_grant_assembly(
 
     return {
         "documents": extracted_documents,
+        "biosketches": biosketches,
         "validation": validation,
         "grant_package": grant_package,
         "output_path": str(saved_path),
