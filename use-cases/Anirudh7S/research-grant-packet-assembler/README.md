@@ -1,28 +1,62 @@
-# SuperDocs Builds
+# Research Grant Packet Assembler
 
-Community builds: apps, integrations and extensions built on the [SuperDocs](https://superdocs.app) platform.
+Built for the SuperDocs Engineer Task.
 
-SuperDocs is an AI document editor that works inside the document, not next to it. It ships as a free web app, a REST API, and an MCP server that lets AI agents read and edit documents on their own. Everything in this repository is built on that public surface.
+## Overview
 
-## What lives here
+A grant packet assembly workflow for Principal Investigators and research-office administrators preparing funder submissions.
 
-| Folder | What belongs in it |
-|---|---|
-| [`use-cases/`](use-cases/) | Apps and end-to-end use cases: vertical tools, document workflows, demos that solve a real problem for a real kind of user |
-| [`extensions/`](extensions/) | Extensions and developer tooling: editor integrations, plugins, CLIs, SDK wrappers, agent pipelines, anything that extends where SuperDocs can run |
+The tool processes a research grant package containing:
 
-Every project is self-contained in its builder's own folder and carries its own README.
+- Research narrative
+- Data-management plan
+- Investigator CVs
+- Facilities statement
+- Budget justification
 
-## Contributing
+## What it does
 
-Fork the repo, build in your own folder, open a pull request. The full mechanics, including how to name your folder and what your PR description must include, are in [CONTRIBUTING.md](CONTRIBUTING.md).
+- Ingests and classifies grant documents
+- Extracts structured facts from each document
+- Validates required grant documents
+- Detects missing collaborator documents
+- Converts investigator CVs into a structured biosketch format while checking content preservation
+- Estimates research-narrative page limits
+- Uses SuperDocs to tighten prose when the page limit is exceeded
+- Supports HITL approval of proposed SuperDocs changes
+- Re-checks the final page limit
+- Exports the final edited document as DOCX
 
-## Useful links
+## SuperDocs Integration
 
-- Product: [use.superdocs.app](https://use.superdocs.app)
-- Developer documentation: [docs.superdocs.app](https://docs.superdocs.app)
-- Contact: hello@superdocs.app
+The workflow uses the SuperDocs REST API for:
 
-## License
+1. Document upload
+2. Asynchronous editing instructions
+3. Human-in-the-loop approval
+4. Final document export
 
-MIT. Every contribution stays publicly credited to its author, permanently.
+## Validation
+
+The implementation was tested with:
+
+- A valid grant package
+- A deliberately missing investigator document
+- A research narrative exceeding the page limit
+- SuperDocs editing and HITL approval
+- Final page-limit verification
+- DOCX export
+
+Example successful page-limit workflow:
+
+6 pages -> SuperDocs editing -> HITL approval -> 5 pages -> DOCX export
+
+## Demo Screenshot
+
+The screenshot below shows the successful SuperDocs page-limit workflow, including editing, approval, final page-limit verification, and DOCX export.
+
+![Task 2 successful SuperDocs workflow](screenshots/task2-success.png)
+
+## Built for the SuperDocs Task
+
+This project was built on SuperDocs for the SuperDocs Engineer Task.
